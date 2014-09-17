@@ -11,8 +11,8 @@ pids
 logs
 results
 
-scottydemo/npm-debug.log
-scottydemo/node_modules
+webappdemo/npm-debug.log
+webappdemo/node_modules
 
-scottydemo/config
-scottydemo/bower_components
+webappdemo/config
+webappdemo/bower_components

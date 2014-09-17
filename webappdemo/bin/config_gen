@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+var root = __dirname + '/../';
+var sh = require('shelljs');
+var fs = require('fs');
+var _ = require('lodash');
+var env = process.env.NODE_ENV || 'development';
+
+if(!sh.test('-e', root+'config')) {
+  sh.mkdir(root+'config');
+}
+
+var conf = {
+  development: {
+    port: 3000
+  }
+};
+
+var db_conf = {
+  development: {
+    database: "[DBHERE]",
+    host: "localhost",
+    dialect: "postgres",
+    username: "[USERNAME]",
+    password: "[PASSWORD]"
+  }
+};
+
+if(sh.test('-e', root+'config/config.json')){
+  var existing = require('../config/config.json');
+  var db;
+  if(sh.test('-e', root+'config/db.json')){
+    db = require('../config/db.json');
+  } else {
+    db = db_conf;
+  }
+}
+if(!(process.env.CI || db_conf[env].username)) {
+  console.log('Enter '+env+' database credentials:\n');
+  var prompt = require('prompt');
+  prompt.start();
+  prompt.get([
+    {name: 'username', required: true},
+    {name: 'password', required: true, hidden: true},
+  ], function(err, data){
+    _.assign(db_conf[env], data);
+    if(env == 'development'){
+      _.assign(db_conf.test, data);
+    }
+    fs.writeFileSync(root+'config/db.json', JSON.stringify(db_conf, null, 2));
+  });
+}
+else {
+  fs.writeFileSync(root+'config/db.json', JSON.stringify(db_conf, null, 2));
+}
+
+fs.writeFileSync(root+'config/config.json', JSON.stringify(conf, null, 2));
